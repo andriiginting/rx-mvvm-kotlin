@@ -13,32 +13,36 @@ import java.util.concurrent.TimeUnit
 
 class RetrofitClient {
 
-    private fun getClient(): Retrofit{
+         private fun getClient(): Retrofit {
 
-        return Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .client(defaultHTTPClient())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
+            return Retrofit.Builder()
+                    .baseUrl(BASE_URL)
+                    .client(defaultHTTPClient())
+                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build()
+        }
+
+        private fun defaultHTTPClient(): OkHttpClient {
+            return OkHttpClient.Builder()
+                    .addInterceptor(defaultLoggingInterceptor())
+                    .connectTimeout(60, TimeUnit.SECONDS)
+                    .readTimeout(60, TimeUnit.SECONDS)
+                    .writeTimeout(60, TimeUnit.SECONDS)
+                    .build()
+        }
+
+        private fun defaultLoggingInterceptor(): HttpLoggingInterceptor {
+            val interceptor = HttpLoggingInterceptor(HttpLoggingInterceptor.Logger { pesan ->
+                Log.d("Error", pesan.toString())
+            }) //membuat interceptor yg berfungsi untuk menerima response log http
+
+            interceptor.level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+
+            return interceptor
+        }
+
+        fun provideApi(): RetrofitInterface{
+            return getClient().create(RetrofitInterface::class.java)
+        }
     }
-
-    private fun defaultHTTPClient(): OkHttpClient{
-        return OkHttpClient.Builder()
-                .addInterceptor(defaultLoggingInterceptor())
-                .connectTimeout(60, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
-                .writeTimeout(60, TimeUnit.SECONDS)
-                .build()
-    }
-
-    private fun defaultLoggingInterceptor(): HttpLoggingInterceptor{
-        val interceptor = HttpLoggingInterceptor(HttpLoggingInterceptor.Logger {
-            pesan -> Log.d("Error",pesan.toString())
-        }) //membuat interceptor yg berfungsi untuk menerima response log http
-
-        interceptor.level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
-
-        return interceptor
-    }
-}

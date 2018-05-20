@@ -8,7 +8,7 @@ import io.reactivex.schedulers.Schedulers
 
 
 class App: Application() {
-    private var defaultSubscribeScheduler: Scheduler? = null
+    var defaultSubscribeScheduler: Scheduler? = null
 
     override fun onCreate() {
         super.onCreate()
